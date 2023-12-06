@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <h3>ta377</h3>
+        Homework 2: Data-Driven Web Apps <br>
+        Tamar Alphaidze<br>
+        31.08.2023<br>
+    </head>
+
+    <body>
+        <p id="q1">
+        1. <br> Create a 360x360 pixel SVG element. Using a style="" attribute, give it a 1px solid black border. <br>
+        Reproduce this plot using SVG elements: <br> <br>
+
+        <svg height=360 width=360 style="border:1px solid black; margin-bottom:50px;">
+            <!-- Define a pattern with grid-like elements -->
+            <defs>
+                <pattern id="gridPattern" width="32" height="32" patternUnits="userSpaceOnUse">
+                  <rect width="40" height="40" fill="white" />
+                  <line x1="0" y1="20" x2="40" y2="20" stroke="lightgray" stroke-width="2"/>
+                  <line x1="20" y1="0" x2="20" y2="40" stroke="lightgray" stroke-width="2"/>
+                </pattern>
+              </defs>
+              
+              <!-- Apply the pattern to the main plot region -->
+              <rect x="20" y="20" width="320" height="320" fill="url(#gridPattern)" stroke="lightgray" stroke-width="2" />
+            
+              <circle cx=52 
+              cy=52
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=68
+              cy=148
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=100
+              cy=212
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=148
+              cy=276
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=180
+              cy=289
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=212
+              cy=263
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=244
+              cy=244
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=276
+              cy=231
+              r=11 
+              fill="darkturquoise" />
+
+              <circle cx=308
+              cy=225
+              r=11 
+              fill="darkturquoise" />
+        </svg>
+        </p>
+
+        <p id="q2"> 
+            2. <br> Examine your finished canvas (or the example image).
+            In a p tag, please identify: <br> <br>
+            A) The marks used for each row of data <br>
+               The marks used for each row of data are circles with the color dark-turquoise. <br> <br>
+            B) The two visual channels used in this visualization <br>
+               The two visual channels used in this visualization are shape and position in common scale.
+        </p>
+
+        <p id="q3">
+        3. <br> Use line and rect elements to create your own version of a Piet Mondrian painting in a 400x400 canvas. <br> <br>
+        <svg height=400 width=400 style="background-color: lightgray;">
+            <rect x="0" y="185" width="20" height="133" fill="blue" />
+            <rect x="178" y="0" width="160" height="40" fill="yellow" />
+            <rect x="340" y="0" width="70" height="90" fill="white" />
+            <rect x="335" y="369" width="70" height="90" fill="red" />
+            <line x1="7" y1="40" x2="340" y2="40" stroke="black" stroke-width="10"/>
+            <line x1="7" y1="315" x2="340" y2="315" stroke="black" stroke-width="10"/>
+            <line x1="25" y1="40" x2="25" y2="315" stroke="black" stroke-width="10"/>
+            <line x1="340" y1="0" x2="340" y2="395" stroke="black" stroke-width="10"/>
+            <line x1="0" y1="185" x2="25" y2="185" stroke="black" stroke-width="10"/>
+            <line x1="174" y1="2" x2="174" y2="40" stroke="black" stroke-width="10"/>
+            <line x1="340" y1="85" x2="400" y2="85" stroke="black" stroke-width="10"/>
+            <line x1="340" y1="370" x2="399" y2="370" stroke="black" stroke-width="10"/>
+            
+            
+        </svg>
+
+        </p>
+    </body>

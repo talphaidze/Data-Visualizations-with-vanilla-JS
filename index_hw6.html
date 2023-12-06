@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wine Scatterplot</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <p>Tamar Alphaidze (ta377) <br> Homework 6 <br> 04.10.2023</p>
+</head>
+<body><p>
+
+  A.<br> This step involves loading and cleaning the data. I start by loading the data
+   from wines.json and then I continue with data cleaning as it was indicated that the dataset contains fake 
+   or inconsistent data points. I first convert the price and points fields to 
+   numbers, cleaning them by removing unwanted characters like dollar signs and commas.
+  I also identify and mark data points that are considered bad data, like points
+   exceeding 100 or containing NaN values. I filter 
+   out the bad data points and keep only valid data. In the end, I also remove outliers, as they made the graph very clamped up.<br><br>
+  Count of bad data items removed: 52 <br>
+  Number of outliers removed: 49. Note: I removed outliers as they were clamping up the chart<br>
+  Number of remaining data points after cleaning: 808 <br><br>
+
+
+  B.<br> In this step, I create an SVG container with specified dimensions (800x500) and set up scales for the x and y axes. The x-axis represents the wine price, and the y-axis represents wine quality points (ranging from 0 to 100). I choose appropriate scales, domains, and ranges for both axes. After this, I add axis labels and gridlines for better readability.
+<br><br>
+
+  C.<br> Here, I create the scatterplot by adding circles to represent valid data points. To reduce overlap when points share the same coordinates, I add a random jitter value to both the x and y positions of each circle. This helps prevent clustering of points with the same values. I also color the circles based on the wine's state of origin.
+<br><br>
+
+  D.<br> I implement hover functionality. When a user hovers over a data point, the circle enlarges, and a floating text label appears to display the wine's title. This provides users with additional information about each point. When the mouse moves away from a point, it returns to its original size, and the label disappears.
+<br><br>
+
+  E.<br> I create a legend for the chart with mouseover filters. When users hover over a state label, the circles in the chart associated with that state stand out, making it easier to identify wines from specific regions. <br> <br>
+
+  Overall, two answer two main questions of the assignment, the price of the wines is not necessarily related to their quality. I do not see a clear positive relationship between the points and the price. Secondly, the data seems to be well distributed except I can see that New York has on average cheaper wines.
+</p>
+
+<script>
+  // A. Load data from wines.json
+  d3.json("wines.json").then(function (data) {
+  // A. Clean and preprocess data
+  let removedCount = 0; 
+  let outliersRemoved = 0; 
+
+  data.forEach(function (d) {
+    // A. Clean price by removing dollar signs and commas and converting to a number
+    d.price = +d.price.replace('$', '').replace(',', '');
+    // A. Convert points to a number
+    d.points = +d.points;
+
+    // Check for and remove bad data points 
+    if (d.points < 0 || d.points > 100 || isNaN(d.points) || isNaN(d.price)) {
+      d.filtered = true; 
+      removedCount++; 
+    } else {
+      d.filtered = false;
+    }
+  });
+
+  // A. Filter out bad data
+  data = data.filter(function (d) {
+    return !d.filtered;
+  });
+    // A. Filter out bad data
+    data = data.filter(function (d) {
+      return !d.filtered;
+    });
+    console.log("Number of bad data items removed: " + removedCount);
+
+    // Removing outliers using IQR method because otherwise the chart was clamped up
+    const pointsQ1 = d3.quantile(data.map(d => d.points).sort(), 0.25);
+    const pointsQ3 = d3.quantile(data.map(d => d.points).sort(), 0.75);
+    const pointsIQR = pointsQ3 - pointsQ1;
+
+    const priceQ1 = d3.quantile(data.map(d => d.price).sort(), 0.25);
+    const priceQ3 = d3.quantile(data.map(d => d.price).sort(), 0.75);
+    const priceIQR = priceQ3 - priceQ1;
+
+    const pointsUpperBound = pointsQ3 + 1.5 * pointsIQR;
+    const priceUpperBound = priceQ3 + 1.5 * priceIQR;
+
+    // Filter out outliers and increment the count of outliers removed
+  data = data.filter(d => {
+    const isOutlier = d.points > pointsUpperBound || d.price > priceUpperBound;
+    if (isOutlier) {
+      outliersRemoved++; 
+    }
+    return !isOutlier;
+  });
+  console.log("Number of outliers removed: " + outliersRemoved);
+  console.log("Number of remaining data points after cleaning: " + data.length);
+
+    // B. Create an SVG container
+    const width = 800;
+    const height = 500;
+    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+    const svg = d3.select("body")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("id", "scatterplot");
+
+    // B. Create x and y scales
+    const xScale = d3.scaleLinear()
+      .domain([d3.min(data, d => d.price), d3.max(data, d => d.price)])
+      .range([margin.left, width - margin.right]);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, 100]) 
+      .range([height - margin.bottom, margin.top]);
+
+    // B. Create x and y axes
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    // B. Append axes to the SVG
+    svg.append("g")
+      .attr("class", "x-axis")
+      .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+      .call(xAxis);
+
+    svg.append("g")
+      .attr("class", "y-axis")
+      .attr("transform", "translate(" + margin.left + ",0)")
+      .call(yAxis);
+
+    // B. Add gridlines using d3.axis
+    svg.append("g")
+      .attr("class", "grid")
+      .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+      .call(d3.axisBottom(xScale).tickSize(-height + margin.top + margin.bottom).tickFormat(""));
+
+    svg.append("g")
+      .attr("class", "grid")
+      .attr("transform", "translate(" + margin.left + ",0)")
+      .call(d3.axisLeft(yScale).tickSize(-width + margin.left + margin.right).tickFormat(""));
+
+    // B. Add x-axis label
+    svg.append("text")
+      .attr("class", "x-label")
+      .attr("x", width / 2)
+      .attr("y", height - margin.bottom + 25) 
+      .style("text-anchor", "middle")
+      .text("Price"); 
+
+    // B. Add y-axis label
+    svg.append("text")
+      .attr("class", "y-label")
+      .attr("x", -(height / 2))
+      .attr("y", margin.left - 25) 
+      .attr("transform", "rotate(-90)")
+      .style("text-anchor", "middle")
+      .text("Points"); 
+
+    // C. Create a group for scatterplot points
+    const scatterplot = svg.append("g")
+      .attr("class", "scatterplot");
+
+    // C. Function to add jitter to avoid overlapping points
+    function jitter(scale) {
+      return (Math.random() - 0.5) * scale;
+    }
+
+    // C. Create circles for data points
+    scatterplot.selectAll("circle")
+      .data(data)
+      .enter().append("circle")
+      .attr("cx", d => xScale(d.price) + jitter(2))
+      .attr("cy", d => yScale(d.points) + jitter(50))
+      .attr("r", 4) 
+      .attr("fill", d => {
+        // C. Color circles by state
+        if (d.state === "New York") return "blue";
+        else if (d.state === "Washington") return "green";
+        else if (d.state === "Oregon") return "orange";
+        else if (d.state === "California") return "red";
+        else return "gray"; 
+      });
+
+    // D. Add hover interaction
+scatterplot.selectAll("circle")
+  .on("mouseover", function (event, d) { 
+    // D. Increase circle size on hover
+    d3.select(this).attr("r", 8);
+
+    // Get mouse coordinates
+    const [x, y] = d3.pointer(event);
+
+    // Create and append the label text
+    const label = svg.append("text")
+      .attr("class", "hover-label")
+      .text(d.title);
+
+    // Calculate label dimensions
+    const labelBBox = label.node().getBBox();
+
+    // Adjust label position to keep it within the SVG boundaries
+    let labelX = x + 10;
+    let labelY = y - 10;
+
+    // Check if label extends beyond the right edge of the SVG
+    if (labelX + labelBBox.width > width - margin.right) {
+      labelX = width - margin.right - labelBBox.width - 10;
+    }
+
+    // Check if label extends beyond the top edge of the SVG
+    if (labelY - labelBBox.height < margin.top) {
+      labelY = margin.top + labelBBox.height + 10;
+    }
+
+    label.attr("x", labelX)
+      .attr("y", labelY);
+  })
+  .on("mouseout", function () {
+    // D. Restore circle size on mouseout
+    d3.select(this).attr("r", 4);
+    
+    // D. Remove the label on mouseout
+    svg.selectAll(".hover-label").remove(); // Use selectAll to remove all labels
+  });
+
+
+
+
+
+    // E. Create legend with mouseover filters
+    const legend = d3.select("body")
+      .append("div")
+      .attr("class", "legend");
+
+    const states = ["New York", "Washington", "Oregon", "California"];
+    const colorScale = d3.scaleOrdinal()
+      .domain(states)
+      .range(["blue", "green", "orange", "red"]);
+
+      states.forEach(state => {
+      legend.append("span")
+        .style("color", colorScale(state))
+        .on("mouseover", function () {
+          // E. Filter the circles by state on mouseover
+          const selectedState = state;
+          scatterplot.selectAll("circle")
+            .style("opacity", d => (d.state === selectedState ? 1 : 0.2));
+        })
+        .on("mouseout", function () {
+          // E. Restore original opacity on mouseout
+          scatterplot.selectAll("circle").style("opacity", 1);
+        })
+        .text(state + " ");
+    });
+
+    
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    Tamar Alphaidze 
+    (ta377) <br>
+    Homework 3 <br>
+    Data-Driven Web Applications (INFO3300)<br>
+    13.09.2023
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>SVG Canvas with D3.js</title>
+</head>
+<body>
+    <p>Exercise 1:</p>
+    <svg width="400" height="400" id="svg-canvas"></svg>
+    <script>
+        
+        const svg = d3.select("#svg-canvas");
+
+        // Here I am creating a <circle> element behind the text
+        // Because the shapes are ordered according to the order in the code,
+        // coding circle first ensures that it is placed behind the text.
+        svg.append("circle")
+            .attr("cx", 200)
+            .attr("cy", 200)
+            .attr("r", 5)
+            .style("fill", "lightgreen")
+            .style("stroke", "none");
+
+        // Here I am creating a <text> element and centering it
+        svg.append("text")
+            .attr("x", 200) // Centered horizontally
+            .attr("y", 200) // Centered vertically
+            .attr("text-anchor", "middle") // Center the text
+            .text("INFO-3300")
+            .style("font-size", "20px")
+            .style("font-family", "Courier")
+            .style("fill", "darkblue");
+
+        // Finally, i am creating three <rect> elements
+        const rectData = [
+            { x: 50, y: 50, width: 80, height: 80, fill: "red", stroke: "black" },
+            { x: 270, y: 50, width: 100, height: 100, fill: "blue", stroke: "hotpink" },
+            { x: 50, y: 270, width: 70, height: 70, fill: "green", stroke: "turquoise" }
+        ];
+
+        svg.selectAll("rect")
+            .data(rectData)
+            .enter()
+            .append("rect")
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .attr("width", d => d.width)
+            .attr("height", d => d.height)
+            .style("fill", d => d.fill)
+            .style("stroke", d => d.stroke);
+    </script>
+
+    
+<p>Exercise 2:</p>
+<svg width="360" height="360" id="scatter-plot" style="border: 1px solid black;"></svg>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+    // Data for scatter plot
+    let data = [
+        { "x": 1.0, "y": 9.0 },
+        { "x": 1.5, "y": 6.0 },
+        { "x": 2.5, "y": 4.0 },
+        { "x": 4.0, "y": 2.0 },
+        { "x": 5.0, "y": 1.6 },
+        { "x": 6.0, "y": 2.4 },
+        { "x": 7.0, "y": 3.0 },
+        { "x": 8.0, "y": 3.4 },
+        { "x": 9.0, "y": 3.6 }
+    ];
+
+    // SVG canvas size and padding
+    const svgWidth = 360;
+    const svgHeight = 360;
+    const padding = 20;
+    const plotWidth = 320;
+    const plotHeight = 320;
+
+    // Here I am creating SVG element
+    const svgScatter = d3.select("#scatter-plot")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
+
+    // Afterwards, I define x and y scales
+    const xScaleScatter = d3.scaleLinear()
+        .domain([0, 10])
+        .range([padding, padding + plotWidth]);
+
+    const yScaleScatter = d3.scaleLinear()
+        .domain([0, 10])
+        .range([svgHeight - padding, svgHeight - padding - plotHeight]);
+
+    // I create gridlines with a for loop
+    for (let i = 0; i <= 10; i++) {
+        svgScatter.append("line")
+            .attr("x1", xScaleScatter(i))
+            .attr("y1", svgHeight - padding)
+            .attr("x2", xScaleScatter(i))
+            .attr("y2", svgHeight - padding - plotHeight)
+            .style("stroke", "grey");
+
+        svgScatter.append("line")
+            .attr("x1", padding)
+            .attr("y1", yScaleScatter(i))
+            .attr("x2", padding + plotWidth)
+            .attr("y2", yScaleScatter(i))
+            .style("stroke", "grey");
+    }
+
+    // Finally, I add circles for data points
+    data.forEach(d => {
+        svgScatter.append("circle")
+            .attr("cx", xScaleScatter(d.x))
+            .attr("cy", yScaleScatter(d.y))
+            .attr("r", 10)
+            .style("fill", "darkturquoise");
+    });
+</script>
+
+</body>
+</html>

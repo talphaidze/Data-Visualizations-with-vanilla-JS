@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://d3js.org/topojson.v2.min.js"></script>
+  Homework 7 <br>
+  Tamar Alphaidze (ta377) <br>
+  25.10.2023
+</head>
+<p> Problem 1
+<body>
+  <svg id="choropleth" height="770" width="990" style="margin:20px"></svg>
+
+  <ul id="legend"></ul>
+
+<script>
+    (async function() {
+      const nyincome = await d3.json("ny_income.topo.json");
+  
+      // A
+      const zips = topojson.feature(nyincome, nyincome.objects.zip_codes);
+      const zipsMesh = topojson.mesh(nyincome, nyincome.objects.zip_codes);
+      const stateMesh = topojson.mesh(nyincome, nyincome.objects.state);
+  
+      const projection = d3.geoMercator().fitSize([990, 770], zips);
+      const path = d3.geoPath().projection(projection);
+  
+      // B
+      const colors = ['#b19cd9', '#cdb7f6', '#7851a9', '#66023c', '#800080'];
+      const incomeValues = zips.features.map((feature) => feature.properties.median_income);
+      console.log(incomeValues)
+      const quantileScale = d3.scaleQuantile().domain(incomeValues).range(colors);
+      console.log(quantileScale.domain());
+      console.log(quantileScale.range());
+  
+      // C
+      const svg = d3.select("#choropleth");
+      const g = svg.append("g");
+      g.append("path")
+        .datum(zipsMesh)
+        .attr("d", path)
+        .style("stroke", "white")
+        .style("stroke-width", "1px");
+  
+      g.append("path")
+        .datum(stateMesh)
+        .attr("d", path)
+        .style("stroke", "#333")
+        .style("stroke-width", "3px");
+  
+      g.selectAll("path")
+        .data(zips.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", (d) => quantileScale(d.properties.median_income));
+  
+      // D
+      const belltowerCoords = projection([-76.4850, 42.4476]);
+      svg.append("circle")
+        .attr("cx", belltowerCoords[0])
+        .attr("cy", belltowerCoords[1])
+        .attr("r", 5)
+        .style("fill", "black");
+  
+      // E
+      const legend = d3.select("#legend");
+      const thresholds = quantileScale.quantiles();
+      thresholds.unshift(d3.min(incomeValues));
+      thresholds.forEach((threshold, index) => {
+        legend.append("li").text(`≥ ${d3.format("$.2s")(threshold)}`);
+      });
+  
+     // F
+    const hoverMesh = svg.append("g").attr("class", "hover-mesh").style("display", "none");
+
+    hoverMesh
+        .append("path")
+        .datum(zipsMesh)
+        .attr("d", path)
+        .style("stroke-width", 10)  
+        .style("stroke", "black")   
+        .style("fill", "none");     
+
+    g.selectAll("path")
+    .on("mouseover", (d) => {
+        hoverMesh.style("display", "block");
+
+    const zipCode = d.properties.ZIP; 
+    const medianIncome = d.properties.median_income; 
+
+    hoverMesh.append("rect")
+      .attr("x", projection(d3.geoCentroid(d))[0])
+      .attr("y", projection(d3.geoCentroid(d))[1])
+      .attr("width", 180)
+      .attr("height", 50)
+      .style("fill", "white")
+      .style("stroke", "black");
+
+    hoverMesh.append("text")
+      .attr("x", projection(d3.geoCentroid(d))[0] + 5)
+      .attr("y", projection(d3.geoCentroid(d))[1] + 20)
+      .text(`ZIP Code: ${zipCode}`)
+      .style("fill", "black");
+
+    hoverMesh.append("text")
+      .attr("x", projection(d3.geoCentroid(d))[0] + 5)
+      .attr("y", projection(d3.geoCentroid(d))[1] + 40)
+      .text(`Median Income: $${d3.format(",")(medianIncome)}`)
+      .style("fill", "black");
+  })
+  .on("mouseout", () => {
+    hoverMesh.style("display", "none");
+    hoverMesh.selectAll("rect").remove();
+    hoverMesh.selectAll("text").remove();
+  });
+
+    })();
+  </script>
+  </p>

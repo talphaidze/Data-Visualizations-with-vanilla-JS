@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <p> Homework 9 <br>
+    08.11.2023 <br>
+    Tamar Alphaidze (ta377)</p>
+    
+</head>
+<body>
+  <svg height="700" width="600" id="lollipop">
+    <defs>
+      <marker id="start" markerWidth="1" markerHeight="6" refX="-2" refY="3" orient="auto">
+        <path d="M 0 0 V 6 H 1 V 0 Z" />
+      </marker>
+      <marker id="end" markerWidth="6" markerHeight="4" refX="7" refY="2" orient="auto">
+        <path d="M 0 0 V 4 L 6 2 Z" />
+      </marker>
+    </defs>
+  </svg>
+
+  <script>
+    // Part A
+    let margin = { "top": 10, "right": 10, "bottom": 45, "left": 45};
+    d3.json("artists.json")
+      .then(function(data) {
+        console.log(data);
+        // Part B
+        let svg = d3.select("svg");
+        let chartWidth = +svg.attr("width") - margin.left - margin.right;
+        let chartHeight = +svg.attr("height") - margin.top - margin.bottom;
+
+      
+        let xScale = d3.scalePoint()
+          .domain(data.map(d => d.category))
+          .range([0, chartWidth])
+          .padding(0.2);
+
+        let yScale = d3.scaleLinear()
+          .domain([0, 1])
+          .range([chartHeight, 0]);
+
+        let xAxis = d3.axisBottom(xScale);
+        
+        let yAxis = d3.axisLeft(yScale)
+            .tickFormat(d => d * 100 + "%");
+
+        svg.append("g")
+          .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top})`)
+          .call(xAxis);
+
+        svg.append("g")
+          .attr("transform", `translate(${margin.left}, ${margin.top})`)
+          .call(yAxis);
+
+        function make_x_gridlines() {
+          return d3.axisBottom(xScale);
+        }
+
+        function make_y_gridlines() {
+          return d3.axisLeft(yScale);
+        }
+
+        svg.append("g")
+          .attr("class", "grid")
+          .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top + 10})`)
+          .call(make_x_gridlines().tickSize(-chartHeight - 10).tickFormat(""))
+          .selectAll("line")
+          .attr("stroke", "#ccc");
+
+        svg.append("g")
+          .attr("class", "grid")
+          .attr("transform", `translate(${margin.left - 10}, ${margin.top})`)
+          .call(make_y_gridlines().tickSize(-chartWidth - 10).tickFormat(""))
+          .selectAll("line")
+          .attr("stroke", "#ccc");
+
+        // Part C
+        let chart = svg.append("g")
+          .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        let lollipops = chart.selectAll(".lollipop")
+          .data(data)
+          .enter()
+          .append("g")
+          .attr("class", "lollipop");
+
+        // Part D
+        lollipops.each(function(d) {
+            d3.select(this).append("line")
+            .attr("x1", xScale(d.category))
+            .attr("y1", yScale(d['1970']))
+            .attr("x2", xScale(d.category))
+            .attr("y2", yScale(d['2020']))
+            .attr("stroke", "black");
+
+          d3.select(this).append("circle")
+            .attr("cx", xScale(d.category))
+            .attr("cy", yScale(d['1970']))
+            .attr("r", 8)
+            .attr("fill", "darkred")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1)
+            .raise();
+
+          d3.select(this).append("circle")
+            .attr("cx", xScale(d.category))
+            .attr("cy", yScale(d['2020']))
+            .attr("r", 8)
+            .attr("fill", "blue")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1)
+            .raise();
+
+          
+        });
+
+        // Part E & F
+        lollipops.each(function(d) {
+          if (Math.abs(yScale(d['2020']) - yScale(d['1970'])) > 30) {
+            d3.select(this).select("line")
+              .attr("x1", xScale(d.category))
+              .attr("y1", yScale(d['1970']))
+              .attr("x2", xScale(d.category))
+              .attr("y2", yScale(d['2020']))
+              .attr("stroke", "black")
+              .attr("stroke-width", 3)
+              .attr("marker-start", "url(#start)")
+              .attr("marker-end", "url(#end)");
+          } else {
+            d3.select(this).select("line").remove();
+          }
+
+          d3.select(this)
+            .on("mouseover", function() {
+              d3.select(this).selectAll("circle")
+                .attr("stroke-width", 3);
+
+              let labelX = xScale(d.category) + (xScale.bandwidth() / 2);
+              let labelY1 = yScale(d['1970']) - 15;
+              let labelY2 = yScale(d['2020']) - 15;
+
+              chart.append("text")
+                .attr("class", "label")
+                .attr("x", labelX)
+                .attr("y", labelY1)
+                .text(d3.format(".1%")(d['1970']));
+
+              chart.append("text")
+                .attr("class", "label")
+                .attr("x", labelX)
+                .attr("y", labelY2)
+                .text(d3.format(".1%")(d['2020']));
+            })
+            .on("mouseout", function() {
+              d3.select(this).selectAll("circle")
+                .attr("stroke-width", 1);
+
+              chart.selectAll(".label").remove();
+            });
+        });
+      });
+  </script>
+</body>
+</html>

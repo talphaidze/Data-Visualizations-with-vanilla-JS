@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homework 5</title>
+    Tamar Alphaidze (ta377) <br>
+    27.09.2023 <br>
+    Homework 5
+    <style>
+        svg {
+            background-color: black;
+        }
+
+        svg#heatmap {
+            background-color: black;
+        }
+
+        svg#color-space {
+            background-color: white;
+        }
+
+        circle {
+            stroke: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Exercise 1: Color Scales-->
+    <p>
+        <strong>Exercise 1</strong><br><br>
+        <strong>A:</strong><br>
+        It is an effective divergent scale. We can see that the left part is going to red,<br>
+         possibly denoting negative effect, and the right part going to the blue color with its saturation increasing, <br>
+         probably denoting a positive effect. Overall, the scale is effective and conveys information in a way that is easily<br>
+         understood by the user.<br><br>
+        <strong>B:</strong><br>
+        This is a rather ineffective color scale. To begin with, the right side that is getting darker <br>
+        is usually assigned to positive values and the left side is usually assigned to negative values. <br>
+        This is because we usually read from left to right, and it only makes sense to go from the negative values <br>
+        on the left to the positive values on the right. This is the first way in which the color scale is misleading. <br>
+        Secondly, as we are speaking about going from negative (-1) to positive (1) values with 0 as a neutral point,<br>
+        I believe that it would be most effective to use a divergent color scale rather than a sequential one.<br><br>
+        <strong>C:</strong><br>
+        There are several anomalous color vision deficiencies that cause the loss of perceivable hue variation.<br>
+        In this case, we used 'Coblis' simulator to identify what specific anomalies applied to the image given in the homework.<br>
+        First of all, Blue-Weak/Tritanomaly that is Anomalous Trichromacy caused the significant perception of the green part of the color scale,<br>
+        meaning that people with this anomaly would not be able to perceive the green part. Afterwards, we identified that in Dichromatic views,<br> 
+        Red-Blind/Protanopia and Green-Blind/Deuteranopia caused significant changes in the color perception. So individuals with these anomalies <br>
+        would not be able to identify at all that they were dealing with blue to green color scale. Individuals with Blue-Blind/Tritanopia would not be <br>
+        able to identify there was a green color in a scale at all. All of these conditions affect the color hue perception.<br><br>
+        <strong>D:</strong><br>
+        I would not recommend that they use a rainbow scale for a county-by-county map because on the map, the counties need to be <br>
+        distinguishable with different color hues, not transitioning between each other.<br><br>
+    </p>
+
+    <!-- Exercise 2: NCAA Basketball Heatmap -->
+    <p>
+        <strong>Exercise 2</strong><br><br>
+        One advantage of the logarithmic color scale is that it helps reveal variations in shot attempts in areas with lower activity,<br>
+        making it easier to spot less-frequented regions on the court. However, a disadvantage is that it can exaggerate the differences<br>
+        in high-activity areas, potentially making them appear even more intense than they are due to the compression of color values in the lower range of attempts.<br>
+    </p>
+    <svg width="500" height="500" id="heatmap"></svg>
+   
+
+    <!-- Exercise 3: HSL Color Space Exploration -->
+    <p>
+        <strong>Exercise 3</strong><br><br>
+        Click and drag the slider to explore the HSL color space.
+    </p>
+    <svg width="420" height="420" id="color-space"></svg>
+    <input type="range" id="lightness-slider" min="0" max="100" step="1" value="50">
+    
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // Exercise 2 - NCAA Basketball Heatmap
+        // Load the data
+        d3.csv("NCAA_shots.csv").then(function(data) {
+            // Calculate the extent of log_attempt
+            const logAttemptExtent = d3.extent(data, d => +d.log_attempt);
+
+            // Create a logarithmic color scale
+            const colorScale = d3.scaleSequential(d3.interpolateViridis)
+                .domain(logAttemptExtent);
+
+            // Select the SVG element for Exercise 2
+            const svg = d3.select("#heatmap");
+
+            // Create <rect> elements for each data point
+            svg.selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("x", d => (d.x / 100) * 500)
+                .attr("y", d => (d.y / 100) * 500)
+                .attr("width", 500 / 5)
+                .attr("height", 500 / 5)
+                .attr("fill", d => colorScale(+d.log_attempt));
+        });
+
+        // Exercise 3 - HSL Color Space Exploration
+        // Create an array of objects representing HSL colors
+        const colors = [];
+        for (let h = 0; h <= 360; h += 18) {
+            for (let s = 0; s <= 100; s += 5) {
+                colors.push({ h, s });
+            }
+        }
+
+        // Create scales for mapping data to positions
+        const xScale = d3.scaleLinear().domain([0, 360]).range([20, 400]);
+        const yScale = d3.scaleLinear().domain([0, 100]).range([400, 20]);
+
+        // Create the SVG element for Exercise 3
+        const svg2 = d3.select("#color-space");
+
+        // Function to update circles based on lightness value for Exercise 3
+        function showCircles(lightness) {
+            const circles = svg2.selectAll("circle")
+                .data(colors);
+
+            circles.enter()
+                .append("circle")
+                .attr("r", 10);
+
+            circles
+                .attr("cx", d => xScale(d.h))
+                .attr("cy", d => yScale(d.s))
+                .style("fill", d => d3.hsl(d.h, d.s / 100, lightness / 100).toString());
+
+            circles.exit().remove();
+        }
+
+        
+        showCircles(50);
+
+        // Add an event listener to the slider for Exercise 3
+        const slider = document.getElementById("lightness-slider");
+        slider.addEventListener("input", function () {
+            showCircles(this.value);
+        });
+
+        showCircles(50);
+    </script>
+</body>
+</html>

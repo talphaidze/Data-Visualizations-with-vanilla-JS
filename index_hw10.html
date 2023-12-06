@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+
+  <style>
+    /*styles*/
+
+    svg {
+      border: 2px solid black;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+    }
+
+    h2 {
+      color: rgb(18, 23, 65);
+    }
+
+    h3 {
+      color: cadetblue;
+      text-decoration: underline;
+
+    }
+
+    /* for the state outlines */
+
+    .state {
+      fill: gray;
+
+    }
+
+    .outline {
+      fill: none;
+      stroke: black;
+      stroke-width: 1px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Homework 10 <br>
+    Tamar Alphaidze (ta377) <br>
+    20.11.2023Home</h2>
+
+  <h3>Sports Expenditure vs. Revenue </h3>
+  <p>Explanation: In this assignment I chose to visualize the dataset ncaa-sports.csv where we have
+    information about the different sports. The data is visualized using a scatteplot. X axis represents expenditure and Y axis represents revenue.
+  The data points of different sports are colored differently. <br> The question that the graph aims to answer is whether higher expenditure on sports results in higher revenue. 
+My hypothesis is that there is a strong positive relationship, which is later proved to be true by the graph. </p>
+  <p>Interactivity: A user is able to use a dropdown menu to filter different sports for better visibility.<br> In addition, when user hovers over a data point they are able to see the institution name, expenditure and revenue on the bottom left. </p>
+  <p> Data Attributes: Expenditure on X axis, Revenue on Y axis, Sport type in different colors.</p>
+  <div id="scatterplot"></div>
+  <script>
+  
+
+    d3.csv('ncaa-sports.csv').then(data => {
+
+      const margin = { top: 50, right: 20, bottom: 50, left: 85 };
+      const svgWidth = 800;
+      const svgHeight = 500;
+
+      const tooltip = d3.select("#tooltip");
+
+      const svg = d3.select("#scatterplot")
+        .append("svg")
+        .attr("width", svgWidth + margin.left + margin.right)
+        .attr("height", svgHeight + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + (margin.left-75) + "," + margin.top + ")");
+
+        const uniqueSports = [...new Set(data.map(d => d.sports))];
+
+        const colorScale = d3.scaleOrdinal()
+        .domain(uniqueSports)
+        .range(d3.schemeCategory10);
+
+      const xScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.total_exp_menwomen) * 1.1]) 
+        .range([margin.left, svgWidth - margin.right]);
+
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.total_rev_menwomen) * 1.1]) 
+        .range([svgHeight - margin.bottom, margin.top]);
+
+      let circles = svg.selectAll("circle")
+        .data(data)
+        .enter().append("circle")
+        .attr("cx", d => {
+          const xValue = xScale(d.total_exp_menwomen);
+          return Math.max(margin.left, Math.min(svgWidth - margin.right, xValue));
+        })
+        .attr("cy", d => {
+          const yValue = yScale(d.total_rev_menwomen);
+          return Math.max(margin.top, Math.min(svgHeight - margin.bottom, yValue)); 
+        })
+        .attr("r", 5)
+        .attr("fill", d => colorScale(d.sports))
+        .on("mouseover", function (event, d) {
+          tooltip.transition()
+            .duration(200)
+            .style("opacity", 0.9);
+          tooltip.html(`${d.institution_name}<br>Expenditure: $${d.total_exp_menwomen}<br>Revenue: $${d.total_rev_menwomen}`)
+            .style("left", (event.pageX + 5) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (d) {
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
+
+      const xAxis = d3.axisBottom(xScale);
+      svg.append("g")
+        .attr("transform", `translate(0, ${svgHeight - 50})`)
+        .call(xAxis);
+
+      const yAxis = d3.axisLeft(yScale);
+      svg.append("g")
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .call(yAxis);
+
+      svg.append("text")
+        .attr("x", svgWidth / 2 +50)
+        .attr("y", svgHeight - 10)
+        .attr("text-anchor", "middle")
+        .text("Expenditure");
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 10)
+        .attr("x", -svgHeight / 2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Revenue");
+
+    const dropdown = svg.append("foreignObject")
+      .attr("width", 120)
+      .attr("height", 30)
+      .attr("x", svgWidth - margin.right - 110)
+      .attr("y", margin.top - 70)  
+      .append("xhtml:body")
+      .html('<select id="legendDropdown" style="width:100%;height:100%;"></select>');
+
+      dropdown.select("select")
+        .append("option")
+        .attr("value", "all")
+        .text("All");
+
+      dropdown.select("select")
+        .selectAll("option")
+        .data(uniqueSports)
+        .enter().append("option")
+        .attr("value", d => d)
+        .style("background-color", d => colorScale(d))
+        .text(d => d);
+
+      function handleDropdownChange() {
+        const selectedSport = dropdown.select("select").property("value");
+
+        const filteredData = selectedSport === "all" ? data : data.filter(d => d.sports === selectedSport);
+
+        const xDomain = selectedSport === "all" ? [0, d3.max(data, d => d.total_exp_menwomen)] : [0, d3.max(filteredData, d => d.total_exp_menwomen)];
+        const yDomain = selectedSport === "all" ? [0, d3.max(data, d => d.total_rev_menwomen)] : [0, d3.max(filteredData, d => d.total_rev_menwomen)];
+
+        xScale.domain(xDomain);
+        yScale.domain(yDomain);
+
+        svg.selectAll("circle").remove();
+
+        svg.selectAll("circle")
+          .data(filteredData)
+          .enter().append("circle")
+          .attr("cx", d => {
+            const xValue = xScale(d.total_exp_menwomen);
+            return Math.max(margin.left, Math.min(svgWidth - margin.right, xValue)); 
+          })
+          .attr("cy", d => {
+            const yValue = yScale(d.total_rev_menwomen);
+            return Math.max(margin.top, Math.min(svgHeight - margin.bottom, yValue)); 
+          })
+          .attr("r", 5)
+          .attr("fill", d => colorScale(d.sports))
+          .on("mouseover", function (event, d) {
+          tooltip.transition()
+            .duration(200)
+            .style("opacity", 0.9);
+          tooltip.html(`${d.institution_name}<br>Expenditure: $${d.total_exp_menwomen}<br>Revenue: $${d.total_rev_menwomen}`)
+            .style("left", (event.pageX + 5) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (d) {
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
+      }
+      dropdown.select("select").on("change", handleDropdownChange);
+
+    });
+    
+  </script>
+  <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+</body>
+
+</html>
+

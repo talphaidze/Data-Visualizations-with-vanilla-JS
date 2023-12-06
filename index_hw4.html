@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework 4</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .legend span {
+            margin-right: 10px;
+        }
+
+        .gridlines line {
+            stroke: #bbb;
+        }
+
+        .gridlines .domain {
+            stroke: none;
+        }
+    </style>
+</head>
+<body>
+    <p> Tamar Alphaidze (ta377) <br> Homework 4 <br> 9/20/2023</p>
+
+    <p> Problem 1 <br>
+        A) <br> 
+        <img src="pictureA.png" width="500" height="300"> <br>
+        Marks: Filled Polygons <br>
+        Visual Channels: Color Hue <br> <br>
+        B) <br>
+        <img src="pictureB.png" width="300" height="300"> <br>
+        Marks: Dots <br>
+        Visual Channels: Aligned Position (X and Y) & Color Hue
+    </p>
+    
+    <p>Problem 2</p>
+
+    <script>
+        // A
+        d3.json("chip_dataset.json").then(function(data) {
+            
+            // B
+            const svgWidth = 500;
+            const svgHeight = 500;
+            
+            const margins = {top: 10, right: 10, bottom: 50, left: 50};
+            const chartWidth = svgWidth - margins.left - margins.right;
+            const chartHeight = svgHeight - margins.top - margins.bottom;
+            
+            const svg = d3.select("body").append("svg")
+                .attr("width", svgWidth)
+                .attr("height", svgHeight)
+                .append("g")
+                .attr("class", "chart")
+                .attr("transform", `translate(${margins.left},${margins.top})`);
+            
+            // C
+            const xExtent = d3.extent(data, d => d["Release Day"]);
+            const yExtent = d3.extent(data, d => d["Transistors(million)"]);
+            
+            const xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([0, chartWidth]);
+            
+            const yScale = d3.scaleLog()
+                .domain(yExtent)
+                .range([chartHeight, 0])
+                .base(10); 
+            
+            const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".1s")); 
+            const yGridlines = d3.axisLeft(yScale)
+                .tickSize(-chartWidth)
+                .tickFormat("");
+            
+            svg.append("g")
+                .attr("class", "y-axis")
+                .attr("transform", `translate(${-margins.left + 40},${margins.top -10})`) 
+                .call(yAxis)
+                .append("text")
+                .attr("y", -30)
+                .attr("x", -chartHeight / 2)
+                .attr("transform", "rotate(-90)")
+                .attr("text-anchor", "middle")
+                .text("Transistors (million)"); 
+            
+            svg.append("g")
+                .attr("class", "gridlines")
+                .call(yGridlines);
+
+            const xAxis = d3.axisBottom(xScale);
+            const xGridlines = d3.axisBottom(xScale)
+                .tickSize(-chartHeight)
+                .tickFormat("");
+            
+            svg.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", `translate(0,${chartHeight + 10})`)
+                .call(xAxis);
+            
+            svg.append("g")
+                .attr("class", "gridlines")
+                .attr("transform", `translate(0,${chartHeight})`)
+                .call(xGridlines)
+                .lower();
+            
+            // D
+            svg.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", d => xScale(d["Release Day"]))
+                .attr("cy", d => yScale(d["Transistors(million)"]))
+                .attr("r", 3) 
+                .attr("fill", "darkblue")
+                .attr("opacity", 0.3); 
+            
+        });
+    </script>
+</body>
+</html>

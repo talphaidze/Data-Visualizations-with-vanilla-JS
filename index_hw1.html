@@ -1,0 +1,141 @@
+<html>
+    <head>
+        Homework 1: Data-Driven Web Apps <br>
+        Tamar Alphaidze<br>
+        25.08.2023<br>
+    </head>
+
+    <body>
+        <p id="p1"> 
+            1. <br>	For each of the following items in the list, please: <br> <br>
+            A: Identify whether it is a canonical JavaScript type (i.e., officially documented as a type) <br>
+            B: If the type is a canonical JavaScript type, please provide an example in your
+             script section first using console.log(___) to print an example and then another call with 
+             console.log(typeof(___)) to show that your example is of the correct type.
+             <br><br>
+            a)	Avocado – noncanonical <br>
+            b)	Array - noncanonical<br>
+            c)	Boolean - canonical<br>
+            d)	Object – canonical <br>
+            e)	Unicode - noncanonical<br>
+            f)	String - canonical<br>
+            g)	Function - noncanonical<br>
+            h)	Int - noncanonical<br>
+            i)	Number - canonical<br>
+            j)	Class - noncanonical<br>
+            k)	Regex - noncanonical<br>
+            l)	Char - noncanonical<br>
+            m)	Undefined – canonical<br>
+            n)	Pointer - noncanonical<br>
+            o)	NaN (“not a number”); - noncanonical<br>
+            <br>
+            (for B see console)
+
+            <script>
+
+                console.log(false)
+                console.log(Math)
+                console.log('tamar')
+                console.log(19)
+                console.log(undefined)
+
+                console.log(typeof(false)) //outputs boolean
+                console.log(typeof(Math)) //outputs object
+                console.log(typeof('tamar')) //outputs string
+                console.log(typeof(19)) //outputs number
+                console.log(typeof(undefined)) //outputs undefined
+
+            </script>
+        </p>
+
+
+        <p id="p2"> 
+            2. <br>Null is a canonical JavaScript type, but it has some unusual or unexpected typeof() behavior. 
+            In 1-2 sentences, explain the unusual behavior that it has. <br> <br>
+            Answer: <br>
+            Null outputs “Object” when printed typeof() in the console to make it more accommodating for programmers; 
+            however, it is not actually an object, it is a null value.
+        </p>
+
+        
+        <p id="p3"> 
+            3.	<br>First, in 1-2 sentences, please define type coercion. Then, in your p tag please provide two examples where 
+            type coercion produces an answer that is unusual or unexpected (i.e., different from Python output or a case 
+            where Python would throw an exception). For each sample, briefly explain why it is unexpected. Then, in the script
+            section put both of your code examples into a console.log() statement 
+            so we can see the result (e.g., console.log(“apple” + “orange”))
+            <br> <br>
+
+            Answer: <br>
+            Type coercion is when for example we try to add two different JavaScript types and instead of throwing an error 
+            like it would do in Python, it concatenates them. As an example, if I type 2 + “hola”, instead of throwing error, 
+            it will output “2hola”, meaning that it will convert a number type to a string type just to make the operation work. 
+            Another example is “true” + false, that will output “truefalse”, meaning that false with type of Boolean was converted 
+            to string type just to make the equation work.
+	        Let’s take a look at the example (see console)
+	
+
+
+            <script>
+
+                console.log(2 + "hola") // outputs 2hola
+                console.log("true" + false) // outputs truefalse
+
+            </script>
+        </p>
+
+
+        <p id="p4"> 
+            4.	<br> In your script tag, create a recursive function, fib(n), which takes an integer, n, as an argument and returns the nth number in the Fibonacci sequence. <br><br>
+                For example, fib(4) would return 2, as 2 is the 4th number in the sequence. For a starting point, we can assume that fib(0)=0 and fib(1)=1.
+                To compute the Fibonacci sequence, you need to add up the two numbers prior to the nth item in the list. For example, fib(4) is found by adding up the results of fib(3) and fib(2). 
+                fib(3) is the result of fib(2)+fib(1). And so on. <br><br> Do not use loops or any built-in Fibonacci functions to accomplish this. Remember that recursion involves two major components: 
+                base case(s) and recursive calls of the function. <br><br> Make sure that your fib function handles negative integers by returning undefined, properly returns 0 for fib(0), 1 for fib(1), 
+                and otherwise uses recursion to compute correct answers for larger integers.<br> <br> Include the following code block after your function to prove it works as expected: <br>
+                console.log( fib(-2) ); <br>
+                console.log( fib(0) ); <br>
+                console.log( fib(1) ); <br>
+                console.log( fib(4) ); <br>
+                console.log( fib(7) ); <br>
+                console.log( fib(9) ); <br> <br>
+                (As the function is only intended to handle integers, do not worry about implementing an algorithm to handle decimal numbers) 
+                
+                <br> <br>
+                (See console for the answers. Open the file in code editor if you want to see the function inside script tag)
+            <script>
+
+                function fib(n) {
+                    if (n < 0) {
+                        return undefined;
+                    } else if (n === 0) {
+                        return 0;
+                    } else if (n === 1) {
+                        return 1;
+                    } else {
+                        return fib(n - 1) + fib(n - 2);
+                    }
+                }
+
+                console.log(fib(-2));
+                console.log(fib(0));
+                console.log(fib(1));
+                console.log(fib(4));
+                console.log(fib(7));
+                console.log(fib(9));
+
+
+            </script>
+        </p>
+
+        <p id="p5"> 
+            5.	<br>Describe, in your own words, the course policy on late and unreadable work outlined in the syllabus, 
+            which is linked from the course website.<br> <br>
+            
+            Answer: <br>
+            Late or corrupted work will be graded with zero. In case of CMS being down, computer problems, or a personal crisis, 
+            the course staff must be contacted in advance. If I wish to extend the deadline, I can use slip days, of which I have five in total.
+        </p>
+
+    </body>
+</html>
+
